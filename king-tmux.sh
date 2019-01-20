@@ -1,10 +1,16 @@
 #!/usr/bin/env sh
 
-tmux new-session -d -s king -c $HOME/go/src/github.com/kong/kubernetes-ingress-controller 
-tmux setenv -t king GOPATH ~/go
-tmux new-window -c $HOME/go/src/github.com/kong/kubernetes-ingress-controller -t king
-tmux new-window -c $HOME/go/src/github.com/kong/kubernetes-ingress-controller -t king
-tmux new-window -c $HOME/go/src/github.com/kong/kubernetes-ingress-controller -t king
+PROJDIR="$HOME/go/src/github.com/kong/kubernetes-ingress-controller"
+
+if [ ! -d "$PROJDIR" ]; then
+    >&2 echo "target directory does not exist: $PROJDIR"
+    exit -1
+fi
+
+tmux new-session -d -s king -c $PROJDIR -n Control
+tmux new-window -c $PROJDIR -t king
+tmux new-window -c $PROJDIR -t king
+tmux new-window -c $PROJDIR/docs -t king -n Docs
 
 for _pane in $(tmux list-panes -s -t king -F '#{pane_id}'); do \
   tmux send-keys -t ${_pane} "export GOPATH=~/go" Enter
@@ -13,5 +19,5 @@ for _pane in $(tmux list-panes -s -t king -F '#{pane_id}'); do \
   tmux clear-history -t ${_pane}
 done
 
-tmux select-window -t 1
+tmux select-window -t Control
 tmux attach-session -E -t king
